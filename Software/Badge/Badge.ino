@@ -47,7 +47,6 @@ const int APP_COUNT = 4; ///< Number of apps in menu
 
 void setup()
 {
-
   initButtons();
 
   // If `A-B-X-Y` are pressed (active LOW) at the same time,
@@ -65,6 +64,9 @@ void setup()
   Serial.begin(115200);
   Serial.setTimeout(60000);
   Serial.println("Normal bootup...");
+
+  // Initialize NVDM
+  LFlash.begin();
 
   // Initialize LED Matrix
   Serial.println("Init LED Matrix...");
@@ -134,7 +136,6 @@ void loop()
 /// \returns false if failed to connect or there is no SSID/PASSWD setting
 bool connectToWiFi()
 {
-  LFlash.begin();
   // Wi-Fi SSID and Password should be less than 64 bytes or less.
   char ssid[MAX_WIFI_INPUT_BUF] = {0};
   char pass[MAX_WIFI_INPUT_BUF] = {0};
@@ -335,14 +336,14 @@ void printWifiStatus()
   Serial.println(" dBm");
 }
 
+static char SSID[MAX_WIFI_INPUT_BUF] = {0};
+static char PASSWD[MAX_WIFI_INPUT_BUF] = {0};
+
 void UpdateWifiSetting()
 {
-  Serial.println("Please enter Wifi SSID:");
   drawframe(Wifi_input, 0, 0, 18, 16);
-
-  char SSID[MAX_WIFI_INPUT_BUF] = {0};
-  char PASSWD[MAX_WIFI_INPUT_BUF] = {0};
-
+  Serial.println("Please enter Wifi SSID:");
+  
   Serial.readBytesUntil('\n', SSID, MAX_WIFI_INPUT_BUF);
 
   Serial.println(SSID);
