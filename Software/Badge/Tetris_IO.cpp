@@ -29,9 +29,7 @@
 const size_t SCREEN_W = 18;
 const size_t SCREEN_H = 16;
 const size_t FRAMEBUF_SIZE = SCREEN_W * SCREEN_H;
-extern unsigned char frameBuffer[FRAMEBUF_SIZE] =
-	{
-		0};
+unsigned char frameBuffer[FRAMEBUF_SIZE] = {0};
 
 /* 
 ======================================									

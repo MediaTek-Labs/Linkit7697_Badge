@@ -20,7 +20,7 @@ void Snake_init()
   // std::deque<dot_position> history;
 
   history_positions.erase(history_positions.begin(), history_positions.end());
-  hal_trng_status_t ret = hal_trng_init(); //Initializes the TRNG source clock.
+  hal_trng_init(); //Initializes the TRNG source clock.
   length = 5;
   last_update = millis();
   for (int i = 0; i < length; i++)

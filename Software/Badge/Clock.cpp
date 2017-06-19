@@ -38,7 +38,6 @@ bool getAndClearUpdateFlag()
 void startClock()
 {
     hal_gpt_running_status_t running_status;
-    hal_gpt_status_t ret_status;
 
     //Get the running status to check if this port is in use or not.
     if (HAL_GPT_STATUS_OK != hal_gpt_get_running_status(HAL_GPT_1, &running_status))
@@ -169,8 +168,8 @@ struct tm NTPparse(uint32_t t)
     t /= 60;
     NTPtime.tm_hour = t % 24;
 
-    uint32_t days = t / 24;
-    uint8_t leap;
+    int32_t days = t / 24;
+    int8_t leap;
     int yOff = 0;
     int m = 0;
     int d = 0;

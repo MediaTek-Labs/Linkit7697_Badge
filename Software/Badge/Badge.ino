@@ -352,7 +352,7 @@ void UpdateWifiSetting()
 
   Serial.readBytesUntil('\n', PASSWD, MAX_WIFI_INPUT_BUF);
 
-  for (int i = 0; i < MAX_WIFI_INPUT_BUF; i++)
+  for (unsigned int i = 0; i < MAX_WIFI_INPUT_BUF; i++)
   {
     if (SSID[i] == '\r' || SSID[i] == '\n')
     {

@@ -132,6 +132,9 @@ void Game::DrawPiece(int pX, int pY, int pPiece, int pRotation)
 			case 2:
 				mColor = BLUE;
 				break; // For the pivot
+			default:
+				mColor = GREEN;
+				break;
 			}
 
 			if (mPieces->GetBlockType(pPiece, pRotation, j, i) != 0)
