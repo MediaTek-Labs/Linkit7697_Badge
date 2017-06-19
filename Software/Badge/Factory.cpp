@@ -153,11 +153,16 @@ void jumpToUnitTest()
   {
     for (int y = 0; y < 16; y++)
     {
-      matrix.drawPixel(x, y, 255);
+      matrix.drawPixel(x, y, 100);
       delay(5);
     }
   }
-  delay(3000);
+  // wait for user pressing center key
+  while(digitalRead(CENTER_BUTTON) == HIGH)
+  {
+    delay(5);
+  }
+  
   matrix.clear();
   int status = myIMU.begin();
   if (status == 1)
