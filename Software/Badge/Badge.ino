@@ -41,7 +41,9 @@
 
 #include "icon.c"
 
-const unsigned int MAX_WIFI_INPUT_BUF = 64;
+const unsigned int MAX_WIFI_SSID_BUF = 33;
+const unsigned int MAX_WIFI_PASSWD_BUF = 64;
+
 int g_appID = 0;         ///< The "App" user selected, ranges from 0 to 3
 const int APP_COUNT = 4; ///< Number of apps in menu
 
@@ -137,12 +139,14 @@ void loop()
 bool connectToWiFi()
 {
   // Wi-Fi SSID and Password should be less than 64 bytes or less.
-  char ssid[MAX_WIFI_INPUT_BUF] = {0};
-  char pass[MAX_WIFI_INPUT_BUF] = {0};
-  uint32_t bufLen = MAX_WIFI_INPUT_BUF;
+  char ssid[MAX_WIFI_SSID_BUF] = {0};
+  char pass[MAX_WIFI_PASSWD_BUF] = {0};
+  uint32_t bufLen = 0;
 
   printMacAddress();
+  bufLen = MAX_WIFI_SSID_BUF;
   LFlash.read("USER", "SSID", (uint8_t *)ssid, &bufLen);
+  bufLen = MAX_WIFI_PASSWD_BUF;
   LFlash.read("USER", "PASSWD", (uint8_t *)pass, &bufLen);
   Serial.print("Stored SSID:");
   Serial.println(ssid);
@@ -336,37 +340,72 @@ void printWifiStatus()
   Serial.println(" dBm");
 }
 
-static char SSID[MAX_WIFI_INPUT_BUF] = {0};
-static char PASSWD[MAX_WIFI_INPUT_BUF] = {0};
+static char SSID[MAX_WIFI_SSID_BUF] = {0};
+static char PASSWD[MAX_WIFI_PASSWD_BUF] = {0};
+
+void ReadFromSerial(char* outputBuf, const size_t bufSize)
+{
+  // clear buffer first
+  memset(outputBuf, 0, bufSize);
+
+  size_t inputLen = 0;
+  while(inputLen < bufSize)
+  {
+    // waiting for keystroke
+    int key = Serial.read();
+    if(-1 == key)
+    { 
+      delay(10);
+      continue;
+    }
+
+    // check if enter is pressed
+    if(key == '\r' || key == '\n')
+    {
+      outputBuf[inputLen] = NULL;
+
+      // check potential CRLF and consume it
+      const int next = Serial.peek();
+      if(next == '\r' || next == '\n')
+      {
+        Serial.read();
+      }
+      break;
+    }
+
+    // drop "invisible characters".
+    // we assume SSID/Password is always ASCII.
+    if(key >= 127 || key < 32)
+    {
+      continue;
+    }
+
+    // truncate to char
+    outputBuf[inputLen] = (char)key;
+    inputLen++;
+  }
+
+  // ensure NULL termination
+  outputBuf[bufSize - 1] = NULL;
+}
 
 void UpdateWifiSetting()
 {
   drawframe(Wifi_input, 0, 0, 18, 16);
-  Serial.println("Please enter Wifi SSID:");
-  
-  Serial.readBytesUntil('\n', SSID, MAX_WIFI_INPUT_BUF);
 
+  Serial.println("Please enter Wifi SSID:");
+  ReadFromSerial(SSID, MAX_WIFI_SSID_BUF);
   Serial.println(SSID);
 
+  delay(300);
+  Serial.flush();
+
   Serial.println("Please enter Wifi password:");
-
-  Serial.readBytesUntil('\n', PASSWD, MAX_WIFI_INPUT_BUF);
-
-  for (unsigned int i = 0; i < MAX_WIFI_INPUT_BUF; i++)
-  {
-    if (SSID[i] == '\r' || SSID[i] == '\n')
-    {
-      SSID[i] = 0;
-    }
-    if (PASSWD[i] == '\r' || PASSWD[i] == '\n')
-    {
-      PASSWD[i] = 0;
-    }
-  }
+  ReadFromSerial(PASSWD, MAX_WIFI_PASSWD_BUF);
   Serial.println(PASSWD);
 
-  LFlashStatus s1 = LFlash.write("USER", "SSID", LFLASH_STRING_DATA, (uint8_t *)SSID, MAX_WIFI_INPUT_BUF);
-  LFlashStatus s2 = LFlash.write("USER", "PASSWD", LFLASH_STRING_DATA, (uint8_t *)PASSWD, MAX_WIFI_INPUT_BUF);
+  LFlashStatus s1 = LFlash.write("USER", "SSID", LFLASH_STRING_DATA, (uint8_t *)SSID, MAX_WIFI_SSID_BUF);
+  LFlashStatus s2 = LFlash.write("USER", "PASSWD", LFLASH_STRING_DATA, (uint8_t *)PASSWD, MAX_WIFI_PASSWD_BUF);
 
   if (s1 == 0 && s2 == 0)
   {
